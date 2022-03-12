@@ -18,7 +18,7 @@ import java.util.List;
 class GoldenRaspberryAwardsReportApplicationTests {
 
     @Test
-    void testeLeituraCsv() throws IOException{
+    void testReadingAndConversationCsv() throws IOException{
         File file = ResourceUtils.getFile("classpath:data/movielist.csv");
         Reader reader = new FileReader(file);
 
