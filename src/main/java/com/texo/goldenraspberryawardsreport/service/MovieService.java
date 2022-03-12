@@ -58,8 +58,42 @@ public class MovieService {
                         min = om.getYear() - previous.getYear();
                         response.add(MovieBuilder.buildIntervalMoviesRequest(previous, om.getYear()));
                     } else {
-                        if (min >= om.getYear() - previous.getYear()) {
+                        if (min >= (om.getYear() - previous.getYear())) {
                             min = om.getYear() - previous.getYear();
+                            response.clear();
+                            response.add(MovieBuilder.buildIntervalMoviesRequest(previous, om.getYear()));
+                        }
+                    }
+                }
+            }
+        });
+        return response;
+    }
+
+    public List<IntervalMoviesRequest> findLongerRangeWinners() {
+        List<IntervalMoviesRequest> response = new ArrayList<>();
+        List<Movie> winners = movieRepository.findWinners();
+        Map<String, List<Movie>> producersGroup =
+                winners.stream().collect(Collectors.groupingBy(Movie::getProducers));
+
+        producersGroup.forEach((key, value) -> {
+            List<Movie> orderedMovies = value
+                    .stream()
+                    .sorted(Comparator.comparing(Movie::getYear))
+                    .collect(Collectors.toList());
+
+            Integer max = null;
+            Movie previous = null;
+            for (Movie om : orderedMovies) {
+                if (previous == null)
+                    previous = om;
+                else {
+                    if (max == null) {
+                        max = om.getYear() - previous.getYear();
+                        response.add(MovieBuilder.buildIntervalMoviesRequest(previous, om.getYear()));
+                    } else {
+                        if (max <= (om.getYear() - previous.getYear())) {
+                            max = om.getYear() - previous.getYear();
                             response.clear();
                             response.add(MovieBuilder.buildIntervalMoviesRequest(previous, om.getYear()));
                         }

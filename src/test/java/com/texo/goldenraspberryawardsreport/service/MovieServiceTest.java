@@ -27,7 +27,19 @@ class MovieServiceTest {
     void findFastestWinners(){
         List<IntervalMoviesRequest> fastestWinners = movieService.findFastestWinners();
         Assertions.assertNotNull(fastestWinners);
-
         fastestWinners.forEach(System.out::println);
+    }
+
+    @Test
+    void findLongerRangeWinners(){
+        List<IntervalMoviesRequest> longerRangeWinners = movieService.findLongerRangeWinners();
+        Assertions.assertNotNull(longerRangeWinners);
+        longerRangeWinners.forEach(System.out::println);
+    }
+
+    @Test
+    void findFastestAndLongerRangeWinners(){
+        findFastestWinners();
+        findLongerRangeWinners();
     }
 }
