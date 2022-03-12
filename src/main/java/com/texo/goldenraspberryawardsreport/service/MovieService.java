@@ -42,7 +42,8 @@ public class MovieService {
         Map<String, List<Movie>> producersGroup =
                 winners.stream().collect(Collectors.groupingBy(Movie::getProducers));
 
-        producersGroup.forEach((key, value) -> {
+        for (Map.Entry<String, List<Movie>> entry : producersGroup.entrySet().stream().filter(pg->pg.getValue().size()>1).collect(Collectors.toList())) {
+            List<Movie> value = entry.getValue();
             List<Movie> orderedMovies = value
                     .stream()
                     .sorted(Comparator.comparing(Movie::getYear))
@@ -60,13 +61,13 @@ public class MovieService {
                     } else {
                         if (min >= (om.getYear() - previous.getYear())) {
                             min = om.getYear() - previous.getYear();
-                            response.clear();
+                            response = new ArrayList<>();
                             response.add(MovieBuilder.buildIntervalMoviesRequest(previous, om.getYear()));
                         }
                     }
                 }
             }
-        });
+        }
         return response;
     }
 
@@ -76,7 +77,8 @@ public class MovieService {
         Map<String, List<Movie>> producersGroup =
                 winners.stream().collect(Collectors.groupingBy(Movie::getProducers));
 
-        producersGroup.forEach((key, value) -> {
+        for (Map.Entry<String, List<Movie>> entry : producersGroup.entrySet().stream().filter(pg->pg.getValue().size()>1).collect(Collectors.toList())) {
+            List<Movie> value = entry.getValue();
             List<Movie> orderedMovies = value
                     .stream()
                     .sorted(Comparator.comparing(Movie::getYear))
@@ -94,13 +96,13 @@ public class MovieService {
                     } else {
                         if (max <= (om.getYear() - previous.getYear())) {
                             max = om.getYear() - previous.getYear();
-                            response.clear();
+                            response = new ArrayList<>();
                             response.add(MovieBuilder.buildIntervalMoviesRequest(previous, om.getYear()));
                         }
                     }
                 }
             }
-        });
+        }
         return response;
     }
 

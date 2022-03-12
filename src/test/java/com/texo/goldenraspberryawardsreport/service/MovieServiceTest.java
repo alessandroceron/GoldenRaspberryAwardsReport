@@ -39,7 +39,9 @@ class MovieServiceTest {
 
     @Test
     void findFastestAndLongerRangeWinners(){
+        System.out.println("VENCEDOR MAIS RAPIDO");
         findFastestWinners();
+        System.out.println("VENCEDOR MAIOR INTERVALO");
         findLongerRangeWinners();
     }
 }
