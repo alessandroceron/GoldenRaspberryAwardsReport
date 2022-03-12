@@ -5,6 +5,7 @@ import com.texo.goldenraspberryawardsreport.builder.MovieBuilder;
 import com.texo.goldenraspberryawardsreport.dto.MovieDto;
 import com.texo.goldenraspberryawardsreport.entity.Movie;
 import com.texo.goldenraspberryawardsreport.repository.MovieRepository;
+import com.texo.goldenraspberryawardsreport.response.IntervalMoviesRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +15,7 @@ import org.springframework.util.ResourceUtils;
 
 import java.io.FileReader;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Spliterator;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -38,6 +36,40 @@ public class MovieService {
         movieRepository.saveAll(movies);
     }
 
+    public List<IntervalMoviesRequest> findFastestWinners() {
+        List<IntervalMoviesRequest> response = new ArrayList<>();
+        List<Movie> winners = movieRepository.findWinners();
+        Map<String, List<Movie>> producersGroup =
+                winners.stream().collect(Collectors.groupingBy(Movie::getProducers));
+
+        producersGroup.forEach((key, value) -> {
+            List<Movie> orderedMovies = value
+                    .stream()
+                    .sorted(Comparator.comparing(Movie::getYear))
+                    .collect(Collectors.toList());
+
+            Integer min = null;
+            Movie previous = null;
+            for (Movie om : orderedMovies) {
+                if (previous == null)
+                    previous = om;
+                else {
+                    if (min == null) {
+                        min = om.getYear() - previous.getYear();
+                        response.add(MovieBuilder.buildIntervalMoviesRequest(previous, om.getYear()));
+                    } else {
+                        if (min >= om.getYear() - previous.getYear()) {
+                            min = om.getYear() - previous.getYear();
+                            response.clear();
+                            response.add(MovieBuilder.buildIntervalMoviesRequest(previous, om.getYear()));
+                        }
+                    }
+                }
+            }
+        });
+        return response;
+    }
+
     public List<Movie> listAll() {
         Spliterator<Movie> movieSpliterator = movieRepository.findAll().spliterator();
         if (Objects.isNull(movieSpliterator)) return new ArrayList<>();
@@ -55,7 +87,7 @@ public class MovieService {
         movieRepository.deleteById(id);
     }
 
-    public void saveInfosByCsv(){
+    public void saveInfosByCsv() {
         // primeiro vamos limpar o banco para inserir os novos dados
         movieRepository.deleteAll();
 
@@ -64,7 +96,7 @@ public class MovieService {
     }
 
 
-    private List<Movie> buildMoviesByCsv(){
+    private List<Movie> buildMoviesByCsv() {
         return MovieBuilder.buildMoviesList(conversationCsv());
     }
 
