@@ -14,7 +14,12 @@ import org.springframework.util.ResourceUtils;
 
 import java.io.FileReader;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Spliterator;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Slf4j
 @Service
@@ -33,8 +38,13 @@ public class MovieService {
         movieRepository.saveAll(movies);
     }
 
-    public Iterable<Movie> listAll() {
-        return movieRepository.findAll();
+    public List<Movie> listAll() {
+        Spliterator<Movie> movieSpliterator = movieRepository.findAll().spliterator();
+        if (Objects.isNull(movieSpliterator)) return new ArrayList<>();
+
+        return StreamSupport
+                .stream(movieSpliterator, false)
+                .collect(Collectors.toList());
     }
 
     public void delete(Movie movie) {
