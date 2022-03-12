@@ -24,7 +24,7 @@ public class Movie {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private String id;
+    private Long id;
 
     @NotNull
     private Integer year;
@@ -38,6 +38,7 @@ public class Movie {
     @NotNull
     private String producers;
 
+    @NotNull
     private Boolean winner;
 
     @CreatedDate
