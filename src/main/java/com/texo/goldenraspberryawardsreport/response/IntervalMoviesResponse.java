@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class IntervalMoviesRequest {
+public class IntervalMoviesResponse {
 
     private String producer;
     private Integer interval;

@@ -5,7 +5,7 @@ import com.texo.goldenraspberryawardsreport.builder.MovieBuilder;
 import com.texo.goldenraspberryawardsreport.dto.MovieDto;
 import com.texo.goldenraspberryawardsreport.entity.Movie;
 import com.texo.goldenraspberryawardsreport.repository.MovieRepository;
-import com.texo.goldenraspberryawardsreport.response.IntervalMoviesRequest;
+import com.texo.goldenraspberryawardsreport.response.IntervalMoviesResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,33 +36,27 @@ public class MovieService {
         movieRepository.saveAll(movies);
     }
 
-    public List<IntervalMoviesRequest> findFastestWinners() {
-        List<IntervalMoviesRequest> response = new ArrayList<>();
-        List<Movie> winners = movieRepository.findWinners();
-        Map<String, List<Movie>> producersGroup =
-                winners.stream().collect(Collectors.groupingBy(Movie::getProducers));
+    public List<IntervalMoviesResponse> findFastestWinners() {
+        List<IntervalMoviesResponse> response = new ArrayList<>();
 
-        for (Map.Entry<String, List<Movie>> entry : producersGroup.entrySet().stream().filter(pg->pg.getValue().size()>1).collect(Collectors.toList())) {
-            List<Movie> value = entry.getValue();
-            List<Movie> orderedMovies = value
-                    .stream()
-                    .sorted(Comparator.comparing(Movie::getYear))
-                    .collect(Collectors.toList());
+        Integer min = null;
+        for (Map.Entry<String, List<Movie>> winners : findMoreOneWin()) {
 
-            Integer min = null;
             Movie previous = null;
-            for (Movie om : orderedMovies) {
+            for (Movie movie : orderedMoviesByYear(winners.getValue())) {
                 if (previous == null)
-                    previous = om;
+                    previous = movie;
                 else {
+                    var interval = movie.getYear() - previous.getYear();
                     if (min == null) {
-                        min = om.getYear() - previous.getYear();
-                        response.add(MovieBuilder.buildIntervalMoviesRequest(previous, om.getYear()));
+                        min = interval;
+                        response = addIntervalResponse(response, previous, movie, true);
                     } else {
-                        if (min >= (om.getYear() - previous.getYear())) {
-                            min = om.getYear() - previous.getYear();
-                            response = new ArrayList<>();
-                            response.add(MovieBuilder.buildIntervalMoviesRequest(previous, om.getYear()));
+                        if (min > interval) {
+                            min = interval;
+                            response = addIntervalResponse(response, previous, movie, true);
+                        } else if (min == interval){
+                            response = addIntervalResponse(response, previous, movie, false);
                         }
                     }
                 }
@@ -71,33 +65,52 @@ public class MovieService {
         return response;
     }
 
-    public List<IntervalMoviesRequest> findLongerRangeWinners() {
-        List<IntervalMoviesRequest> response = new ArrayList<>();
-        List<Movie> winners = movieRepository.findWinners();
-        Map<String, List<Movie>> producersGroup =
-                winners.stream().collect(Collectors.groupingBy(Movie::getProducers));
+    private List<Movie> orderedMoviesByYear(List<Movie> movies) {
+        return movies
+                .stream()
+                .sorted(Comparator.comparing(Movie::getYear))
+                .collect(Collectors.toList());
+    }
 
-        for (Map.Entry<String, List<Movie>> entry : producersGroup.entrySet().stream().filter(pg->pg.getValue().size()>1).collect(Collectors.toList())) {
-            List<Movie> value = entry.getValue();
-            List<Movie> orderedMovies = value
-                    .stream()
-                    .sorted(Comparator.comparing(Movie::getYear))
-                    .collect(Collectors.toList());
+    /**
+     * Buscar todos os ganhadores com mais de uma vitória
+     * @return List de ganhadores agrupados em um Map
+     */
+    private List<Map.Entry<String, List<Movie>>> findMoreOneWin() {
+        return movieRepository.findWinners().stream()
+                .collect(Collectors.groupingBy(Movie::getProducers))
+                .entrySet().stream()
+                .filter(pg -> pg.getValue().size() > 1)
+                .collect(Collectors.toList());
+    }
 
-            Integer max = null;
+    private List<IntervalMoviesResponse> addIntervalResponse(List<IntervalMoviesResponse> response, Movie previous, Movie next, boolean clearResponse) {
+        if (clearResponse) response = new ArrayList<>();
+        response.add(MovieBuilder.buildIntervalMoviesRequest(previous, next.getYear()));
+        return response;
+    }
+
+    public List<IntervalMoviesResponse> findLongerRangeWinners() {
+        List<IntervalMoviesResponse> response = new ArrayList<>();
+
+        Integer max = null;
+        for (Map.Entry<String, List<Movie>> winners : findMoreOneWin()) {
+
             Movie previous = null;
-            for (Movie om : orderedMovies) {
+            for (Movie movie : orderedMoviesByYear(winners.getValue())) {
                 if (previous == null)
-                    previous = om;
+                    previous = movie;
                 else {
+                    var interval = movie.getYear() - previous.getYear();
                     if (max == null) {
-                        max = om.getYear() - previous.getYear();
-                        response.add(MovieBuilder.buildIntervalMoviesRequest(previous, om.getYear()));
+                        max = interval;
+                        response = addIntervalResponse(response, previous, movie, true);
                     } else {
-                        if (max <= (om.getYear() - previous.getYear())) {
-                            max = om.getYear() - previous.getYear();
-                            response = new ArrayList<>();
-                            response.add(MovieBuilder.buildIntervalMoviesRequest(previous, om.getYear()));
+                        if (max < interval) {
+                            max = interval;
+                            response = addIntervalResponse(response, previous, movie, true);
+                        } else if (max == interval){
+                            response = addIntervalResponse(response, previous, movie, false);
                         }
                     }
                 }

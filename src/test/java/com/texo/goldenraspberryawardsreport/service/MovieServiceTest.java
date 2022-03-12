@@ -1,7 +1,7 @@
 package com.texo.goldenraspberryawardsreport.service;
 
 import com.texo.goldenraspberryawardsreport.entity.Movie;
-import com.texo.goldenraspberryawardsreport.response.IntervalMoviesRequest;
+import com.texo.goldenraspberryawardsreport.response.IntervalMoviesResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,14 +25,14 @@ class MovieServiceTest {
 
     @Test
     void findFastestWinners(){
-        List<IntervalMoviesRequest> fastestWinners = movieService.findFastestWinners();
+        List<IntervalMoviesResponse> fastestWinners = movieService.findFastestWinners();
         Assertions.assertNotNull(fastestWinners);
         fastestWinners.forEach(System.out::println);
     }
 
     @Test
     void findLongerRangeWinners(){
-        List<IntervalMoviesRequest> longerRangeWinners = movieService.findLongerRangeWinners();
+        List<IntervalMoviesResponse> longerRangeWinners = movieService.findLongerRangeWinners();
         Assertions.assertNotNull(longerRangeWinners);
         longerRangeWinners.forEach(System.out::println);
     }

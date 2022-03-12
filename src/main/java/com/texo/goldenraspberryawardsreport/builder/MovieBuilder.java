@@ -2,7 +2,7 @@ package com.texo.goldenraspberryawardsreport.builder;
 
 import com.texo.goldenraspberryawardsreport.dto.MovieDto;
 import com.texo.goldenraspberryawardsreport.entity.Movie;
-import com.texo.goldenraspberryawardsreport.response.IntervalMoviesRequest;
+import com.texo.goldenraspberryawardsreport.response.IntervalMoviesResponse;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,8 +28,8 @@ public class MovieBuilder {
                 .build();
     }
 
-    public static IntervalMoviesRequest buildIntervalMoviesRequest(Movie movie, Integer nextYear) {
-        return IntervalMoviesRequest.builder()
+    public static IntervalMoviesResponse buildIntervalMoviesRequest(Movie movie, Integer nextYear) {
+        return IntervalMoviesResponse.builder()
                 .producer(movie.getProducers())
                 .interval(nextYear - movie.getYear())
                 .previousWin(movie.getYear())
