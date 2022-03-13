@@ -35,7 +35,15 @@ public class MovieControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content()
                         .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("min.size()", is(2)));
+                .andExpect(jsonPath("min.size()", is(2)))
+                .andExpect(jsonPath("min[0].interval", is(2)))
+                .andExpect(jsonPath("min[0].producer", is("Produtor 4")))
+                .andExpect(jsonPath("min[1].interval", is(2)))
+                .andExpect(jsonPath("min[1].producer", is("Produtor 2")))
+                .andExpect(jsonPath("max.size()", is(1)))
+                .andExpect(jsonPath("max[0].interval", is(5)))
+                .andExpect(jsonPath("max[0].producer", is("Produtor 1")))
+        ;
     }
 
     private void createDb() {
@@ -51,30 +59,30 @@ public class MovieControllerTest {
                 Movie.builder().year(2001).title("Titulo 3").studios("Estúdio 3").producers("Produtor 3").winner(false).build(),
                 Movie.builder().year(2001).title("Titulo 4").studios("Estúdio 4").producers("Produtor 4").winner(false).build(),
 
+                Movie.builder().year(2002).title("Titulo 1").studios("Estúdio 1").producers("Produtor 1").winner(false).build(),
+                Movie.builder().year(2002).title("Titulo 2").studios("Estúdio 2").producers("Produtor 2").winner(false).build(),
+                Movie.builder().year(2002).title("Titulo 3").studios("Estúdio 3").producers("Produtor 3").winner(true).build(),
+                Movie.builder().year(2002).title("Titulo 4").studios("Estúdio 4").producers("Produtor 4").winner(false).build(),
+
                 Movie.builder().year(2003).title("Titulo 1").studios("Estúdio 1").producers("Produtor 1").winner(false).build(),
-                Movie.builder().year(2003).title("Titulo 2").studios("Estúdio 2").producers("Produtor 2").winner(false).build(),
-                Movie.builder().year(2003).title("Titulo 3").studios("Estúdio 3").producers("Produtor 3").winner(true).build(),
+                Movie.builder().year(2003).title("Titulo 2").studios("Estúdio 2").producers("Produtor 2").winner(true).build(),
+                Movie.builder().year(2003).title("Titulo 3").studios("Estúdio 3").producers("Produtor 3").winner(false).build(),
                 Movie.builder().year(2003).title("Titulo 4").studios("Estúdio 4").producers("Produtor 4").winner(false).build(),
 
                 Movie.builder().year(2004).title("Titulo 1").studios("Estúdio 1").producers("Produtor 1").winner(false).build(),
-                Movie.builder().year(2004).title("Titulo 2").studios("Estúdio 2").producers("Produtor 2").winner(true).build(),
+                Movie.builder().year(2004).title("Titulo 2").studios("Estúdio 2").producers("Produtor 2").winner(false).build(),
                 Movie.builder().year(2004).title("Titulo 3").studios("Estúdio 3").producers("Produtor 3").winner(false).build(),
-                Movie.builder().year(2004).title("Titulo 4").studios("Estúdio 4").producers("Produtor 4").winner(false).build(),
+                Movie.builder().year(2004).title("Titulo 4").studios("Estúdio 4").producers("Produtor 4").winner(true).build(),
 
-                Movie.builder().year(2005).title("Titulo 1").studios("Estúdio 1").producers("Produtor 1").winner(false).build(),
+                Movie.builder().year(2005).title("Titulo 1").studios("Estúdio 1").producers("Produtor 1").winner(true).build(),
                 Movie.builder().year(2005).title("Titulo 2").studios("Estúdio 2").producers("Produtor 2").winner(false).build(),
                 Movie.builder().year(2005).title("Titulo 3").studios("Estúdio 3").producers("Produtor 3").winner(false).build(),
-                Movie.builder().year(2005).title("Titulo 4").studios("Estúdio 4").producers("Produtor 4").winner(true).build(),
+                Movie.builder().year(2005).title("Titulo 4").studios("Estúdio 4").producers("Produtor 4").winner(false).build(),
 
-                Movie.builder().year(2006).title("Titulo 1").studios("Estúdio 1").producers("Produtor 1").winner(true).build(),
+                Movie.builder().year(2006).title("Titulo 1").studios("Estúdio 1").producers("Produtor 1").winner(false).build(),
                 Movie.builder().year(2006).title("Titulo 2").studios("Estúdio 2").producers("Produtor 2").winner(false).build(),
                 Movie.builder().year(2006).title("Titulo 3").studios("Estúdio 3").producers("Produtor 3").winner(false).build(),
-                Movie.builder().year(2006).title("Titulo 4").studios("Estúdio 4").producers("Produtor 4").winner(false).build(),
-
-                Movie.builder().year(2007).title("Titulo 1").studios("Estúdio 1").producers("Produtor 1").winner(false).build(),
-                Movie.builder().year(2007).title("Titulo 2").studios("Estúdio 2").producers("Produtor 2").winner(false).build(),
-                Movie.builder().year(2007).title("Titulo 3").studios("Estúdio 3").producers("Produtor 3").winner(false).build(),
-                Movie.builder().year(2007).title("Titulo 4").studios("Estúdio 4").producers("Produtor 4").winner(true).build()
+                Movie.builder().year(2006).title("Titulo 4").studios("Estúdio 4").producers("Produtor 4").winner(true).build()
         );
         movieRepository.saveAll(movies);
     }
