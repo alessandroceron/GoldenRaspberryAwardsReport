@@ -2,6 +2,7 @@ package com.texo.goldenraspberryawardsreport.service;
 
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.texo.goldenraspberryawardsreport.builder.MovieBuilder;
+import com.texo.goldenraspberryawardsreport.dto.CurrentWinnersAndIntervalDto;
 import com.texo.goldenraspberryawardsreport.dto.MovieDto;
 import com.texo.goldenraspberryawardsreport.entity.Movie;
 import com.texo.goldenraspberryawardsreport.repository.MovieRepository;
@@ -46,8 +47,10 @@ public class MovieService {
     }
 
     private List<IntervalMoviesResponse> filterWinnerByComparator(FilterWinner.Filter filterWinner) {
-        List<IntervalMoviesResponse> response = new ArrayList<>();
-        Integer currentInterval = null;
+        return goThroughListMoreOneWinner(filterWinner, new CurrentWinnersAndIntervalDto()).getResponse();
+    }
+
+    private CurrentWinnersAndIntervalDto goThroughListMoreOneWinner(FilterWinner.Filter filterWinner, CurrentWinnersAndIntervalDto current) {
         for (Map.Entry<String, List<Movie>> winners : findMoreOneWin()) {
             Movie previous = null;
             for (Movie movie : orderedMoviesByYear(winners.getValue())) {
@@ -55,21 +58,21 @@ public class MovieService {
                     previous = movie;
                 else {
                     var interval = movie.getYear() - previous.getYear();
-                    if (currentInterval == null) {
-                        currentInterval = interval;
-                        response = addIntervalResponse(response, previous, movie, true);
+                    if (current.getCurrentInterval() == null) {
+                        current.setCurrentInterval(interval);
+                        current.setResponse(addIntervalResponse(current.getResponse(), previous, movie, true));
                     } else {
-                        if (filterWinner.run(currentInterval, interval)) {
-                            currentInterval = interval;
-                            response = addIntervalResponse(response, previous, movie, true);
-                        } else if (currentInterval == interval) {
-                            response = addIntervalResponse(response, previous, movie, false);
+                        if (filterWinner.run(current.getCurrentInterval(), interval)) {
+                            current.setCurrentInterval(interval);
+                            current.setResponse(addIntervalResponse(current.getResponse(), previous, movie, true));
+                        } else if (current.getCurrentInterval() == interval) {
+                            current.setResponse(addIntervalResponse(current.getResponse(), previous, movie, false));
                         }
                     }
                 }
             }
         }
-        return response;
+        return current;
     }
 
     private List<Movie> orderedMoviesByYear(List<Movie> movies) {
