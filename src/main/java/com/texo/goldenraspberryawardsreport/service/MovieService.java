@@ -6,6 +6,7 @@ import com.texo.goldenraspberryawardsreport.dto.CurrentWinnersAndIntervalDto;
 import com.texo.goldenraspberryawardsreport.dto.MovieDto;
 import com.texo.goldenraspberryawardsreport.entity.Movie;
 import com.texo.goldenraspberryawardsreport.repository.MovieRepository;
+import com.texo.goldenraspberryawardsreport.response.FastAndLongerWinners;
 import com.texo.goldenraspberryawardsreport.response.IntervalMoviesResponse;
 import com.texo.goldenraspberryawardsreport.utils.FilterWinner;
 import lombok.SneakyThrows;
@@ -36,6 +37,16 @@ public class MovieService {
 
     public void saveAll(List<Movie> movies) {
         movieRepository.saveAll(movies);
+    }
+
+    /**
+     * Busca os vencedores mais rápidos e com o maior intervalo
+     */
+    public FastAndLongerWinners minAndMaxWinners() {
+        return FastAndLongerWinners.builder()
+                .min(findFastestWinners())
+                .max(findLongerRangeWinners())
+                .build();
     }
 
     /**
