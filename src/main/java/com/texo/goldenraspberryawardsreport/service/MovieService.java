@@ -6,6 +6,7 @@ import com.texo.goldenraspberryawardsreport.dto.MovieDto;
 import com.texo.goldenraspberryawardsreport.entity.Movie;
 import com.texo.goldenraspberryawardsreport.repository.MovieRepository;
 import com.texo.goldenraspberryawardsreport.response.IntervalMoviesResponse;
+import com.texo.goldenraspberryawardsreport.utils.FilterWinner;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,25 +38,31 @@ public class MovieService {
     }
 
     public List<IntervalMoviesResponse> findFastestWinners() {
+        return filterWinnerByComparator(new FilterWinner.FastestWinners());
+    }
+
+    public List<IntervalMoviesResponse> findLongerRangeWinners() {
+        return filterWinnerByComparator(new FilterWinner.LongerRangeWinners());
+    }
+
+    private List<IntervalMoviesResponse> filterWinnerByComparator(FilterWinner.Filter filterWinner) {
         List<IntervalMoviesResponse> response = new ArrayList<>();
-
-        Integer min = null;
+        Integer currentInterval = null;
         for (Map.Entry<String, List<Movie>> winners : findMoreOneWin()) {
-
             Movie previous = null;
             for (Movie movie : orderedMoviesByYear(winners.getValue())) {
                 if (previous == null)
                     previous = movie;
                 else {
                     var interval = movie.getYear() - previous.getYear();
-                    if (min == null) {
-                        min = interval;
+                    if (currentInterval == null) {
+                        currentInterval = interval;
                         response = addIntervalResponse(response, previous, movie, true);
                     } else {
-                        if (min > interval) {
-                            min = interval;
+                        if (filterWinner.run(currentInterval, interval)) {
+                            currentInterval = interval;
                             response = addIntervalResponse(response, previous, movie, true);
-                        } else if (min == interval){
+                        } else if (currentInterval == interval) {
                             response = addIntervalResponse(response, previous, movie, false);
                         }
                     }
@@ -74,6 +81,7 @@ public class MovieService {
 
     /**
      * Buscar todos os ganhadores com mais de uma vitória
+     *
      * @return List de ganhadores agrupados em um Map
      */
     private List<Map.Entry<String, List<Movie>>> findMoreOneWin() {
@@ -87,35 +95,6 @@ public class MovieService {
     private List<IntervalMoviesResponse> addIntervalResponse(List<IntervalMoviesResponse> response, Movie previous, Movie next, boolean clearResponse) {
         if (clearResponse) response = new ArrayList<>();
         response.add(MovieBuilder.buildIntervalMoviesRequest(previous, next.getYear()));
-        return response;
-    }
-
-    public List<IntervalMoviesResponse> findLongerRangeWinners() {
-        List<IntervalMoviesResponse> response = new ArrayList<>();
-
-        Integer max = null;
-        for (Map.Entry<String, List<Movie>> winners : findMoreOneWin()) {
-
-            Movie previous = null;
-            for (Movie movie : orderedMoviesByYear(winners.getValue())) {
-                if (previous == null)
-                    previous = movie;
-                else {
-                    var interval = movie.getYear() - previous.getYear();
-                    if (max == null) {
-                        max = interval;
-                        response = addIntervalResponse(response, previous, movie, true);
-                    } else {
-                        if (max < interval) {
-                            max = interval;
-                            response = addIntervalResponse(response, previous, movie, true);
-                        } else if (max == interval){
-                            response = addIntervalResponse(response, previous, movie, false);
-                        }
-                    }
-                }
-            }
-        }
         return response;
     }
 
