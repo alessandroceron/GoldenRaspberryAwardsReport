@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface MovieRepository extends PagingAndSortingRepository<Movie, String> {
 
-    @Query("select m from Movie m")
-//    @Query("select m from Movie m where m.winner = true")
+//    @Query("select m from Movie m")
+    @Query("select m from Movie m where m.winner = true")
     List<Movie> findWinners();
 }
