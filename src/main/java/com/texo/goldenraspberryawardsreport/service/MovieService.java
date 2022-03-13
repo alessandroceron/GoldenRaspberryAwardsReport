@@ -50,29 +50,43 @@ public class MovieService {
         return goThroughListMoreOneWinner(filterWinner, new CurrentWinnersAndIntervalDto()).getResponse();
     }
 
+    /**
+     * Agrupamos os produtores e já filtramos somente quem ganhou mais de uma vez
+     */
     private CurrentWinnersAndIntervalDto goThroughListMoreOneWinner(FilterWinner.Filter filterWinner, CurrentWinnersAndIntervalDto current) {
         for (Map.Entry<String, List<Movie>> winners : findMoreOneWin()) {
-            Movie previous = null;
-            for (Movie movie : orderedMoviesByYear(winners.getValue())) {
-                if (previous == null)
-                    previous = movie;
-                else {
-                    var interval = movie.getYear() - previous.getYear();
-                    if (current.getCurrentInterval() == null) {
-                        current.setCurrentInterval(interval);
-                        current.setResponse(addIntervalResponse(current.getResponse(), previous, movie, true));
-                    } else {
-                        if (filterWinner.run(current.getCurrentInterval(), interval)) {
-                            current.setCurrentInterval(interval);
-                            current.setResponse(addIntervalResponse(current.getResponse(), previous, movie, true));
-                        } else if (current.getCurrentInterval() == interval) {
-                            current.setResponse(addIntervalResponse(current.getResponse(), previous, movie, false));
-                        }
-                    }
+            goThroughOrderedMovies(filterWinner, current, winners, null);
+        }
+        return current;
+    }
+
+    /**
+     * Ordenamos cada agrupamento para garantir a integridade dos cálculos
+     */
+    private void goThroughOrderedMovies(FilterWinner.Filter filterWinner, CurrentWinnersAndIntervalDto current, Map.Entry<String, List<Movie>> winners, Movie previous) {
+        for (Movie movie : orderedMoviesByYear(winners.getValue())) {
+            previous = calculateIntervals(filterWinner, current, previous, movie);
+        }
+    }
+
+    private Movie calculateIntervals(FilterWinner.Filter filterWinner, CurrentWinnersAndIntervalDto current, Movie previous, Movie movie) {
+        if (previous == null)
+            previous = movie;
+        else {
+            var interval = movie.getYear() - previous.getYear();
+            if (current.getCurrentInterval() == null) {
+                current.setCurrentInterval(interval);
+                current.setResponse(addIntervalResponse(current.getResponse(), previous, movie, true));
+            } else {
+                if (filterWinner.run(current.getCurrentInterval(), interval)) {
+                    current.setCurrentInterval(interval);
+                    current.setResponse(addIntervalResponse(current.getResponse(), previous, movie, true));
+                } else if (current.getCurrentInterval() == interval) {
+                    current.setResponse(addIntervalResponse(current.getResponse(), previous, movie, false));
                 }
             }
         }
-        return current;
+        return previous;
     }
 
     private List<Movie> orderedMoviesByYear(List<Movie> movies) {
