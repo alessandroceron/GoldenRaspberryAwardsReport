@@ -38,20 +38,31 @@ public class MovieService {
         movieRepository.saveAll(movies);
     }
 
+    /**
+     * Busca os vencedores com o menor intervalo
+     */
     public List<IntervalMoviesResponse> findFastestWinners() {
         return filterWinnerByComparator(new FilterWinner.FastestWinners());
     }
 
+    /**
+     * Busca os vencedores com o maior intervalo
+     */
     public List<IntervalMoviesResponse> findLongerRangeWinners() {
         return filterWinnerByComparator(new FilterWinner.LongerRangeWinners());
     }
 
+    /**
+     * Faz a busca conforme a necessidade do filtro, vencedor mais rápido ou com maior intervalo
+     */
     private List<IntervalMoviesResponse> filterWinnerByComparator(FilterWinner.Filter filterWinner) {
         return goThroughListMoreOneWinner(filterWinner, new CurrentWinnersAndIntervalDto()).getResponse();
     }
 
     /**
      * Agrupamos os produtores e já filtramos somente quem ganhou mais de uma vez
+     *
+     * @return um Dto com os resultado e o intervalo
      */
     private CurrentWinnersAndIntervalDto goThroughListMoreOneWinner(FilterWinner.Filter filterWinner, CurrentWinnersAndIntervalDto current) {
         for (Map.Entry<String, List<Movie>> winners : findMoreOneWin()) {
