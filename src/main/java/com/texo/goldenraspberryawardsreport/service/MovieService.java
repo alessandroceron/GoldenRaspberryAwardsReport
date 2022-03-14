@@ -22,6 +22,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static java.util.stream.Collectors.toList;
+
 @Slf4j
 @Service
 public class MovieService {
@@ -76,7 +78,7 @@ public class MovieService {
      * @return um Dto com os resultado e o intervalo
      */
     private CurrentWinnersAndIntervalDto goThroughListMoreOneWinner(FilterWinner.Filter filterWinner, CurrentWinnersAndIntervalDto current) {
-        for (Map.Entry<String, List<Movie>> winners : findMoreOneWin()) {
+        for (Map.Entry<String, List<Movie>> winners : findMoreOneWin().entrySet()) {
             goThroughOrderedMovies(filterWinner, current, winners);
         }
         return current;
@@ -141,12 +143,24 @@ public class MovieService {
      *
      * @return List de ganhadores agrupados em um Map
      */
-    private List<Map.Entry<String, List<Movie>>> findMoreOneWin() {
-        return movieRepository.findWinners().stream()
-                .collect(Collectors.groupingBy(Movie::getProducers))
-                .entrySet().stream()
-                .filter(pg -> pg.getValue().size() > 1)
-                .collect(Collectors.toList());
+    private Map<String, List<Movie>> findMoreOneWin() {
+        List<Movie> winners = movieRepository.findWinners();
+        HashMap<String, List<Movie>> map = new HashMap<>();
+
+        for (String name : buildListProducers(winners)){
+            map.put(name, winners.parallelStream()
+                    .filter(winner -> winner.getProducers().contains(name))
+                    .collect(Collectors.toList()));
+        }
+        return map;
+    }
+
+    private List<String> buildListProducers(List<Movie> winners) {
+        return winners.stream()
+                .flatMap(winner -> Arrays.stream(winner.getProducers().split(",| AND | and |;|:|-")))
+                .filter(m -> !m.isBlank())
+                .map(String::trim)
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 
     private List<IntervalMoviesResponse> addIntervalResponse(List<IntervalMoviesResponse> response, Movie previous, Movie next, boolean clearResponse) {
@@ -161,7 +175,7 @@ public class MovieService {
 
         return StreamSupport
                 .stream(movieSpliterator, false)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     public void delete(Movie movie) {
