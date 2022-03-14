@@ -102,7 +102,7 @@ public class MovieControllerTest {
                 Movie.builder().year(2006).title("Titulo 1").studios("Estúdio 1").producers("Produtor 1").winner(false).build(),
                 Movie.builder().year(2006).title("Titulo 2").studios("Estúdio 2").producers("Produtor 2").winner(false).build(),
                 Movie.builder().year(2006).title("Titulo 3").studios("Estúdio 3").producers("Produtor 3").winner(false).build(),
-                Movie.builder().year(2006).title("Titulo 4").studios("Estúdio 4").producers("Produtor 4").winner(true).build(),
+                Movie.builder().year(2006).title("Titulo 4").studios("Estúdio 4").producers("Produtor 7, Produtor 4 and Produtor 6").winner(true).build(),
 
                 Movie.builder().year(2007).title("Titulo 1").studios("Estúdio 1").producers("Produtor 1").winner(false).build(),
                 Movie.builder().year(2007).title("Titulo 2").studios("Estúdio 2").producers("Produtor 2").winner(false).build(),
@@ -112,7 +112,7 @@ public class MovieControllerTest {
                 Movie.builder().year(2008).title("Titulo 1").studios("Estúdio 1").producers("Produtor 1").winner(false).build(),
                 Movie.builder().year(2008).title("Titulo 2").studios("Estúdio 2").producers("Produtor 2").winner(false).build(),
                 Movie.builder().year(2008).title("Titulo 3").studios("Estúdio 3").producers("Produtor 3").winner(false).build(),
-                Movie.builder().year(2008).title("Titulo 4").studios("Estúdio 4").producers("Produtor 4").winner(true).build()
+                Movie.builder().year(2008).title("Titulo 4").studios("Estúdio 4").producers("Produtor 4 and Produtor 5").winner(true).build()
         );
         movieRepository.saveAll(movies);
     }

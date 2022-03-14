@@ -78,8 +78,8 @@ public class MovieService {
      * @return um Dto com os resultado e o intervalo
      */
     private CurrentWinnersAndIntervalDto goThroughListMoreOneWinner(FilterWinner.Filter filterWinner, CurrentWinnersAndIntervalDto current) {
-        for (Map.Entry<String, List<Movie>> winners : findMoreOneWin().entrySet()) {
-            goThroughOrderedMovies(filterWinner, current, winners);
+        for (Map.Entry<String, List<Movie>> winner : findMoreOneWin().entrySet()) {
+            goThroughOrderedMovies(filterWinner, current, winner);
         }
         return current;
     }
@@ -87,14 +87,14 @@ public class MovieService {
     /**
      * Ordenamos cada agrupamento para garantir a integridade dos cálculos
      */
-    private void goThroughOrderedMovies(FilterWinner.Filter filterWinner, CurrentWinnersAndIntervalDto current, Map.Entry<String, List<Movie>> winners) {
+    private void goThroughOrderedMovies(FilterWinner.Filter filterWinner, CurrentWinnersAndIntervalDto current, Map.Entry<String, List<Movie>> winner) {
         Movie previous = null;
-        for (Movie movie : orderedMoviesByYear(winners.getValue())) {
-            previous = calculateIntervals(filterWinner, current, previous, movie);
+        for (Movie movie : orderedMoviesByYear(winner.getValue())) {
+            previous = calculateIntervals(filterWinner, current, previous, movie, winner.getKey());
         }
     }
 
-    private Movie calculateIntervals(FilterWinner.Filter filterWinner, CurrentWinnersAndIntervalDto current, Movie previous, Movie movie) {
+    private Movie calculateIntervals(FilterWinner.Filter filterWinner, CurrentWinnersAndIntervalDto current, Movie previous, Movie movie, String producer) {
         // primeiro item desse produtor
         if (previous == null)
             return movie;
@@ -102,33 +102,33 @@ public class MovieService {
         var interval = movie.getYear() - previous.getYear();
 
         // Verificamos se essa é a primeira validação de intervalo
-        if (validateFirstInterval(current, previous, movie, interval, current.getCurrentInterval() == null))
+        if (validateFirstInterval(current, previous, movie, producer, interval, current.getCurrentInterval() == null))
             return movie;
 
         // Verificamos se o novo intervalo é menos que o anterior, se for resetamos o array de movies e o intervalo de controle
-        if (validateFirstInterval(current, previous, movie, interval, filterWinner.run(current.getCurrentInterval(), interval)))
+        if (validateFirstInterval(current, previous, movie, producer, interval, filterWinner.run(current.getCurrentInterval(), interval)))
             return movie;
 
         // Se o intervalo é o mesmo do intervalo de controle, adicionamos esse movie
         if (current.getCurrentInterval() == interval)
-            addMovieResponse(current, previous, movie, interval, false);
+            addMovieResponse(current, previous, movie, producer, interval, false);
 
         return movie;
     }
 
-    private boolean validateFirstInterval(CurrentWinnersAndIntervalDto current, Movie previous, Movie movie, int interval, boolean filterWinnerIsTrue) {
+    private boolean validateFirstInterval(CurrentWinnersAndIntervalDto current, Movie previous, Movie movie, String producer, int interval, boolean filterWinnerIsTrue) {
         if (filterWinnerIsTrue) {
-            addMovieResponse(current, previous, movie, interval, true);
+            addMovieResponse(current, previous, movie, producer, interval, true);
             return true;
         }
         return false;
     }
 
-    private void addMovieResponse(CurrentWinnersAndIntervalDto current, Movie previous, Movie movie, int interval, boolean isNewInterval) {
+    private void addMovieResponse(CurrentWinnersAndIntervalDto current, Movie previous, Movie movie, String producer, int interval, boolean isNewInterval) {
         if (isNewInterval)
             current.setCurrentInterval(interval);
 
-        current.setResponse(addIntervalResponse(current.getResponse(), previous, movie, isNewInterval));
+        current.setResponse(addIntervalResponse(current.getResponse(), producer, previous, movie, isNewInterval));
     }
 
     private List<Movie> orderedMoviesByYear(List<Movie> movies) {
@@ -147,7 +147,7 @@ public class MovieService {
         List<Movie> winners = movieRepository.findWinners();
         HashMap<String, List<Movie>> map = new HashMap<>();
 
-        for (String name : buildListProducers(winners)){
+        for (String name : buildListProducers(winners)) {
             map.put(name, winners.parallelStream()
                     .filter(winner -> winner.getProducers().contains(name))
                     .collect(Collectors.toList()));
@@ -163,9 +163,9 @@ public class MovieService {
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    private List<IntervalMoviesResponse> addIntervalResponse(List<IntervalMoviesResponse> response, Movie previous, Movie next, boolean clearResponse) {
+    private List<IntervalMoviesResponse> addIntervalResponse(List<IntervalMoviesResponse> response, String producer, Movie previous, Movie next, boolean clearResponse) {
         if (clearResponse) response = new ArrayList<>();
-        response.add(MovieBuilder.buildIntervalMoviesRequest(previous, next.getYear()));
+        response.add(MovieBuilder.buildIntervalMoviesRequest(producer, previous, next.getYear()));
         return response;
     }
 

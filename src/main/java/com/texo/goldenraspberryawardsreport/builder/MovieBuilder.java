@@ -28,9 +28,9 @@ public class MovieBuilder {
                 .build();
     }
 
-    public static IntervalMoviesResponse buildIntervalMoviesRequest(Movie movie, Integer nextYear) {
+    public static IntervalMoviesResponse buildIntervalMoviesRequest(String producer, Movie movie, Integer nextYear) {
         return IntervalMoviesResponse.builder()
-                .producer(movie.getProducers())
+                .producer(producer)
                 .interval(nextYear - movie.getYear())
                 .previousWin(movie.getYear())
                 .followingWin(nextYear)
